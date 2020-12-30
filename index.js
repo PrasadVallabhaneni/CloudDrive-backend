@@ -168,7 +168,7 @@ app.post("/register", async (req, res) => {
         to: req.body.email, // list of receivers
         subject: "Activate Account ✔", // Subject line
         text: "Hello world?", // plain text body
-        html: `<a href="http://localhost:4000/activate/${req.body.email}/${string}">Click on this link to activate your account</a>`, // html body
+        html: `<a href="https://s3drive-aws.herokuapp.com/activate/${req.body.email}/${string}">Click on this link to activate your account</a>`, // html body
       });
       await db
         .collection("Users")
@@ -275,7 +275,7 @@ app.post("/forgot", async (req, res) => {
         to: req.body.email, // list of receivers
         subject: "Reset Password ✔", // Subject line
         text: "Hello world?", // plain text body
-        html: `<a href="http://localhost:4000/auth/${req.body.email}/${string}">Click on this link </a>`, // html body
+        html: `<a href="https://s3drive-aws.herokuapp.com/auth/${req.body.email}/${string}">Click on this link </a>`, // html body
       });
       await db
         .collection("Users")
