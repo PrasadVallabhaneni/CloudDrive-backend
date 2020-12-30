@@ -1,7 +1,7 @@
 const express = require("express");
-const multer = require("multer");
+// const multer = require("multer");
 const AWS = require("aws-sdk");
-const uuid = require("uuid").v4;
+// const uuid = require("uuid").v4;
 
 const mongodb = require("mongodb");
 const cors = require("cors");
@@ -21,34 +21,40 @@ app.use(cors());
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ID,
   secretAccessKey: process.env.AWS_SECRET,
+  
 });
 
-const storage = multer.memoryStorage({
-  destination: function (req, file, callback) {
-    callback(null, "");
-  },
-});
+// const storage = multer.memoryStorage({
+//   destination: function (req, file, callback) {
+//     callback(null, "");
+//   },
+// });
 
-const upload = multer({ storage }).single("file");
+// const upload = multer({ storage }).single("file");
 
-app.post("/upload", upload, (req, res) => {
-  let myFile = req.file.originalname.split(".");
-  const fileType = myFile[myFile.length - 1];
-  //  var file = req.files.file;
+app.post("/delete/:id/:key",async (req, res) => {
+   let clientInfo = await mongoClient.connect(dbURL);
+    let db = clientInfo.db("GoogleDrive");  
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `${uuid()}.${fileType}`,
-    Body: req.file.buffer,
+    Key: req.params.key,
   };
 
-  s3.upload(params, (error, data) => {
+  s3.deleteObject(params, async (error, data) => {
     if (error) {
       res.status(500).send(error);
     }
-
-    res.status(200).send({ data });
+ let dbdelete = await db
+      .collection("Users")
+      .updateOne(
+        { _id: objectId(req.params.id) },
+        { $pull: { paths: {key:req.params.key} } }
+      );
+    res.status(200).send({message:'file deleted',dbdelete});
   });
 });
+
+
 app.post("/folder", (req, res) => {
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
@@ -62,32 +68,56 @@ app.post("/folder", (req, res) => {
     res.status(200).send(data);
   });
 });
-
-app.get("/files", (req, res) => {
+app.get('/files',(req,res)=>{
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Delimiter: "/",
     //   Prefix: "files/",
-    //    Key: `a843f4ac-c425-4e0b-9d11-a362c345e83d.doc`,
   };
-  // s3.getObject(params,(err,data)=>{
-  //      if (err) {
-  //        res.status(500).send(error);
-  //      }
-
-  //      res.status(200).send(data);
-  // })
-  // var data=s3.getSignedUrl('getObject',params).split('?')
-  // var path=data[0]
-  s3.listObjectsV2(params, (err, data) => {
-    if (err) {
-      res.status(500).send(error);
-    }
-
-    res.status(200).send(data.Contents);
-  });
-  // res.status(200).send(path)
+    s3.listObjectsV2(params, (err, data) => {
+      if (err) {
+        res.status(500).send(error);
+      }
+  
+  res.status(200).json([data.Contents,data.CommonPrefixes]);
 });
+});
+
+
+// app.get("/file", (req, res) => {
+//   const params = {
+//     Bucket: process.env.AWS_BUCKET_NAME,
+//     // Delimiter: "/",
+//     //   Prefix: "files/",
+//      Key: `a843f4ac-c425-4e0b-9d11-a362c345e83d.doc`,
+//   };
+//   s3.getObject(params,(err,data)=>{
+//        if (err) {
+//          res.status(500).send(error);
+//        }
+// // var objdata=data.toString('base64')
+//        res.status(200).send(data);
+//     //    const reader = fs.createReadStream(
+//     //      new URL(
+//     //        "https://googledriveclone.s3.ap-south-1.amazonaws.com/a843f4ac-c425-4e0b-9d11-a362c345e83d.doc"
+//     //      )
+//     //    );
+//     //    reader.on("data", function (chunk) {
+//     //      res.send(chunk.toString());
+//     //      console.log(chunk.toString());
+//     //    }); 
+//   })
+//   // var data=s3.getSignedUrl('getObject',params).split('?')
+//   // var path=data[0]
+// //   s3.listObjectsV2(params, (err, data) => {
+// //     if (err) {
+// //       res.status(500).send(error);
+// //     }
+
+//     // res.status(200).send(data.Contents);
+//   });
+//   // res.status(200).send(path)
+
 
 app.get("/", async (req, res) => {
   try {
@@ -355,7 +385,7 @@ app.put("/updateToken/:mail", async (req, res) => {
   }
 });
 
-app.get("/user/:id", auth, async (req, res) => {
+app.get("/user/:id",auth, async (req, res) => {
   try {
     let clientInfo = await mongoClient.connect(dbURL);
     let db = clientInfo.db("GoogleDrive");
@@ -366,7 +396,24 @@ app.get("/user/:id", auth, async (req, res) => {
     clientInfo.close();
   } catch (error) {
     console.log(error);
-    res.send(500);
+    res.status(500).json({message:"error"});
+  }
+});
+app.post("/file/:id", async (req, res) => {
+  try {
+    let clientInfo = await mongoClient.connect(dbURL);
+    let db = clientInfo.db("GoogleDrive");
+    let data = await db
+      .collection("Users")
+      .updateOne(
+        { _id: objectId(req.params.id) },
+        { $push: { paths: req.body } }
+      );
+    res.status(200).json({ data });
+    clientInfo.close();
+  } catch (error) {
+    console.log(error);
+    res.status(500);
   }
 });
 
