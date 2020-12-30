@@ -68,20 +68,20 @@ app.post("/folder", (req, res) => {
     res.status(200).send(data);
   });
 });
-app.get('/files',(req,res)=>{
-  const params = {
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Delimiter: "/",
-    //   Prefix: "files/",
-  };
-    s3.listObjectsV2(params, (err, data) => {
-      if (err) {
-        res.status(500).send(error);
-      }
+// app.get('/files',(req,res)=>{
+//   const params = {
+//     Bucket: process.env.AWS_BUCKET_NAME,
+//     Delimiter: "/",
+//     //   Prefix: "files/",
+//   };
+//     s3.listObjectsV2(params, (err, data) => {
+//       if (err) {
+//         res.status(500).send(error);
+//       }
   
-  res.status(200).json([data.Contents,data.CommonPrefixes]);
-});
-});
+//   res.status(200).json([data.Contents,data.CommonPrefixes]);
+// });
+// });
 
 
 // app.get("/file", (req, res) => {
@@ -132,33 +132,8 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.post("/add-user", async (req, res) => {
-  try {
-    let clientInfo = await mongoClient.connect(dbURL);
-    let db = clientInfo.db("GoogleDrive");
-    let data = await db.collection("Users").insertOne(req.body);
-    res.status(200).json({ message: "User created" });
-    clientInfo.close();
-  } catch (error) {
-    console.log(error);
-    res.status(500);
-  }
-});
 
-app.get("/get-user/:id", async (req, res) => {
-  try {
-    let clientInfo = await mongoClient.connect(dbURL);
-    let db = clientInfo.db("GoogleDrive");
-    let data = await db
-      .collection("Users")
-      .findOne({ _id: objectId(req.params.id) });
-    res.status(200).json({ data });
-    clientInfo.close();
-  } catch (error) {
-    console.log(error);
-    res.send(500);
-  }
-});
+
 
 app.post("/register", async (req, res) => {
   try {
