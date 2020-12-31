@@ -200,7 +200,7 @@ app.get("/activate/:mail/:string", async (req, res) => {
           { email: req.params.mail },
           { $set: { string: "", status: true } }
         );
-      res.redirect(`http://localhost:3000`);
+      res.redirect(`https://my--drive.herokuapp.com`);
       res.status(200).json({ message: "activated" });
     } else {
       res.status(200).json({ message: "Link Expired" });
@@ -302,7 +302,7 @@ app.get("/auth/:mail/:string", async (req, res) => {
 
     if (result.string == req.params.string) {
       res.redirect(
-        `http://localhost:3000/reset?${req.params.mail}?${req.params.string}`
+        `https://my--drive.herokuapp.com/reset?${req.params.mail}?${req.params.string}`
       );
       //   res.status(200).json({message:'matched'});
     } else {
