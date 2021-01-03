@@ -68,20 +68,21 @@ app.post("/folder", (req, res) => {
     res.status(200).send(data);
   });
 });
-// app.get('/files',(req,res)=>{
-//   const params = {
-//     Bucket: process.env.AWS_BUCKET_NAME,
-//     Delimiter: "/",
-//     //   Prefix: "files/",
-//   };
-//     s3.listObjectsV2(params, (err, data) => {
-//       if (err) {
-//         res.status(500).send(error);
-//       }
+
+app.get('/files/:name',(req,res)=>{
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Delimiter: "/",
+      Prefix: req.params.name+'/',
+  };
+    s3.listObjectsV2(params, (err, data) => {
+      if (err) {
+        res.status(500).send(error);
+      }
   
-//   res.status(200).json([data.Contents,data.CommonPrefixes]);
-// });
-// });
+  res.status(200).json([data.Contents,data.CommonPrefixes]);
+});
+});
 
 
 // app.get("/file", (req, res) => {
@@ -391,5 +392,22 @@ app.post("/file/:id", async (req, res) => {
     res.status(500);
   }
 });
+app.post("/folder/:id", async (req, res) => {
+  try {
+    let clientInfo = await mongoClient.connect(dbURL);
+    let db = clientInfo.db("GoogleDrive");
+    let data = await db
+      .collection("Users")
+      .updateOne(
+        { _id: objectId(req.params.id) },
+        { $push: { folders: req.body } }
+      );
+    res.status(200).json({ data });
+    clientInfo.close();
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+  }
+})
 
 app.listen(port, () => console.log("your app runs with port:", port));
