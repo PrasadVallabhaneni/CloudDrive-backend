@@ -32,7 +32,7 @@ const s3 = new AWS.S3({
 
 // const upload = multer({ storage }).single("file");
 
-app.post("/delete/:id/:key",async (req, res) => {
+app.post("/delete/:id/:file/:key",async (req, res) => {
    let clientInfo = await mongoClient.connect(dbURL);
     let db = clientInfo.db("GoogleDrive");  
   const params = {
@@ -48,7 +48,7 @@ app.post("/delete/:id/:key",async (req, res) => {
       .collection("Users")
       .updateOne(
         { _id: objectId(req.params.id) },
-        { $pull: { folders: {key:req.params.key} } }
+        { $pull: { paths: {key:req.params.key} } }
       );
     res.status(200).send({message:'file deleted',dbdelete});
   });
