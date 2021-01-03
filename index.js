@@ -48,7 +48,7 @@ app.post("/delete/:id/:key",async (req, res) => {
       .collection("Users")
       .updateOne(
         { _id: objectId(req.params.id) },
-        { $pull: { paths: {key:req.params.key} } }
+        { $pull: { folders: {key:req.params.key} } }
       );
     res.status(200).send({message:'file deleted',dbdelete});
   });
