@@ -32,14 +32,14 @@ const s3 = new AWS.S3({
 
 // const upload = multer({ storage }).single("file");
 
-app.post("/delete/:id/:key",async (req, res) => {
+app.post("/delete/:id",async (req, res) => {
    let clientInfo = await mongoClient.connect(dbURL);
     let db = clientInfo.db("GoogleDrive");  
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: req.params.key,
+    Key: req.body.Key,
   };
-
+  console.log(req.body)
   s3.deleteObject(params, async (error, data) => {
     if (error) {
       res.status(500).send(error);
@@ -48,7 +48,7 @@ app.post("/delete/:id/:key",async (req, res) => {
       .collection("Users")
       .updateOne(
         { _id: objectId(req.params.id) },
-        { $pull: { paths: {key:req.params.key} } }
+        { $pull: { paths: {Key:req.body.Key} } }
       );
     res.status(200).send({message:'file deleted',dbdelete});
   });
@@ -69,11 +69,11 @@ app.post("/folder", (req, res) => {
   });
 });
 
-app.get('/files/:name',(req,res)=>{
+app.post('/files',(req,res)=>{
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Delimiter: "/",
-      Prefix: req.params.name+'/',
+      Prefix: req.body.name+'/',
   };
     s3.listObjectsV2(params, (err, data) => {
       if (err) {
