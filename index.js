@@ -331,7 +331,7 @@ app.put("/resetpassword/:mail/:string", async (req, res) => {
         .collection("Users")
         .updateOne(
           { email: req.params.mail },
-          { $set: { password: req.body.newPass } }
+          { $set: { password: req.body.newPass, string:"" } }
         );
       if (data) {
         res.status(200).json({ message: "Password Updated" });
