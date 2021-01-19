@@ -69,19 +69,25 @@ app.post("/folder", (req, res) => {
   });
 });
 
-app.post('/files',(req,res)=>{
-  const params = {
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Delimiter: "/",
-      Prefix: req.body.name+'/',
-  };
+app.post('/files',auth,(req,res)=>{
+ try{
+    const params = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Delimiter: "/",
+      Prefix: req.body.name,
+    };
     s3.listObjectsV2(params, (err, data) => {
       if (err) {
         res.status(500).send(error);
       }
-  
-  res.status(200).json([data.Contents,data.CommonPrefixes]);
-});
+
+      res.status(200).json([data.Contents, data.CommonPrefixes]);
+    });
+
+ }catch(error){
+ console.log(error);
+ res.status(500).json({ message: "error" });
+ }
 });
 
 
