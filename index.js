@@ -158,32 +158,32 @@ app.post("/register", async (req, res) => {
       req.body.password = hash;
       await db.collection("Users").insertOne(req.body);
 
-      var string = Math.random().toString(36).substr(2, 10);
-      let transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-          user: process.env.SENDER, // generated ethereal user
-          pass: process.env.PASS, // generated ethereal password
-        },
-      });
+      // var string = Math.random().toString(36).substr(2, 10);
+      // let transporter = nodemailer.createTransport({
+      //   host: "smtp.gmail.com",
+      //   port: 587,
+      //   secure: false, // true for 465, false for other ports
+      //   auth: {
+      //     user: process.env.SENDER, // generated ethereal user
+      //     pass: process.env.PASS, // generated ethereal password
+      //   },
+      // });
 
-      // send mail with defined transport object
-      let info = await transporter.sendMail({
-        from: process.env.SENDER, // sender address
-        to: req.body.email, // list of receivers
-        subject: "Activate Account ✔", // Subject line
-        text: "Hello world?", // plain text body
-        html: `<a href="https://s3drive-aws.herokuapp.com/activate/${req.body.email}/${string}">Click on this link to activate your account</a>`, // html body
-      });
+      // // send mail with defined transport object
+      // let info = await transporter.sendMail({
+      //   from: process.env.SENDER, // sender address
+      //   to: req.body.email, // list of receivers
+      //   subject: "Activate My Drive Account ✔", // Subject line
+      //   text: "Hello world?", // plain text body
+      //   html: `<a href="https://s3drive-aws.herokuapp.com/activate/${req.body.email}/${string}">Click on this link to activate your My Drive account</a>`, // html body
+      // });
       await db
         .collection("Users")
-        .updateOne({ email: req.body.email }, { $set: { string: string } });
+        .updateOne({ email: req.body.email }, { $set: { status: true } });
       res.status(200).json({
         message:
-          "Please Click on conformation link send to your mail to activate",
-        status: "sent",
+          "User Registered Successfully. Redirecting to login page...",
+        status:true,
       });
       clientInfo.close();
     }
